@@ -1,0 +1,229 @@
+{
+  "info": {
+    "name": "Metrics EQ15 API - Collection Complète",
+    "description": "Collection complète pour tester l'API de métriques Kanban et Pull Requests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Health & Admin",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Vérifier l'état de l'API"
+          }
+        },
+        {
+          "name": "Initialize Database",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/init-db",
+            "description": "Créer les tables de la base de données"
+          }
+        },
+        {
+          "name": "Refresh Data from GitHub",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/ingest/refresh",
+            "description": "Rafraîchir les issues et PRs depuis GitHub"
+          }
+        },
+        {
+          "name": "Create Snapshot",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/snapshot",
+            "description": "Capturer l'état actuel du Kanban"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kanban Metrics",
+      "item": [
+        {
+          "name": "Lead Time - Issue Spécifique",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/metrics/kanban/lead-time/1",
+            "description": "Lead time pour l'issue #1"
+          }
+        },
+        {
+          "name": "Lead Time - Période",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/kanban/lead-time?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "kanban", "lead-time"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Lead time moyen pour une période donnée"
+          }
+        },
+        {
+          "name": "Tâches Actives - Doing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/kanban/active-count?column=Doing",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "kanban", "active-count"],
+              "query": [{"key": "column", "value": "Doing"}]
+            },
+            "description": "Nombre de tâches actives dans la colonne 'Doing'"
+          }
+        },
+        {
+          "name": "Tâches Complétées",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/kanban/completed-count?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "kanban", "completed-count"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Nombre de tâches complétées dans une période"
+          }
+        },
+        {
+          "name": "Dernier Snapshot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/metrics/kanban/snapshots/latest",
+            "description": "Récupérer le dernier snapshot enregistré"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pull Request Metrics",
+      "item": [
+        {
+          "name": "PR Lead Time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/prs/lead-time?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "prs", "lead-time"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Lead time médian des PRs mergées"
+          }
+        },
+        {
+          "name": "PR Merge Rate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/prs/merge-rate?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "prs", "merge-rate"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Taux de merge des PRs sur la période"
+          }
+        },
+        {
+          "name": "PR Size Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/prs/size?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "prs", "size"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Taille moyenne des PRs et pourcentage de petites PRs"
+          }
+        },
+        {
+          "name": "PR Review Cycles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/prs/review-cycles?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "prs", "review-cycles"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Nombre moyen de cycles de review"
+          }
+        },
+        {
+          "name": "PR Review Latency",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/prs/review-latency?start={{startDate}}&end={{endDate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "prs", "review-latency"],
+              "query": [
+                {"key": "start", "value": "{{startDate}}"},
+                {"key": "end", "value": "{{endDate}}"}
+              ]
+            },
+            "description": "Latence approximative de review"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "description": "URL de base de l'API"
+    },
+    {
+      "key": "startDate",
+      "value": "2024-01-01T00:00:00",
+      "description": "Date de début pour les requêtes de période"
+    },
+    {
+      "key": "endDate",
+      "value": "2024-12-31T23:59:59",
+      "description": "Date de fin pour les requêtes de période"
+    }
+  ]
+}

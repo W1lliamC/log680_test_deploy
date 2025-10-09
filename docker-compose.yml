@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    env_file: ./src/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data  # Pour persister la DB SQLite
+    environment:
+      - SQLITE_DSN=sqlite:///./data/dev.db
+  db:
+    image: postgres:16
+    container_name: metrics-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: metrics
+    ports:
+      - "5432:5432"       # optional: expose for local tools
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: metrics-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8082:80"
+    depends_on:
+      db:
+        condition: service_started
+    volumes:
+      - pgadmin:/var/lib/pgadmin  # keeps your saved server connections
+      
+volumes:
+  pgdata:
+  pgadmin:
