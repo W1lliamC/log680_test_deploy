@@ -18,6 +18,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          tags: |
+            local/metrics-15:${{ github.sha }}
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -25,7 +27,7 @@ jobs:
       # Save image as tar so next jobs can load the *same tested* image
       - name: Save image tar
         run: |
-          docker save -o image.tar local/metrics-15
+          docker save -o image.tar local/metrics-15:${{ github.sha }}
       - uses: actions/upload-artifact@v4
         with:
           name: built-image
