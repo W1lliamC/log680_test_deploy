@@ -92,8 +92,8 @@ jobs:
             -p 8000:8000 \
             -e POSTGRES_DSN=postgresql+psycopg2://postgres:postgres@pg:5432/metrics_test \
             -e GITHUB_TOKEN="${TOKEN}" \
-            -e GITHUB_OWNER=RussellJimmies
-            -e GITHUB_REPO=metrics-eq15
+            -e GITHUB_OWNER=RussellJimmies \
+            -e GITHUB_REPO=metrics-eq15 \
             --entrypoint "" \
             local/metrics-15:${{ github.sha }} \
             uvicorn src.app:app --host 0.0.0.0 --port 8000
