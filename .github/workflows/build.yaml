@@ -8,20 +8,8 @@ jobs:
   # 1) BUILD: build image once, save as artifact
   build:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.meta.outputs.slug }}-${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
-
-      # Compute a stable local tag to carry across jobs (no push yet)
-      - id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: local/metrics-15
-          tags: |
-            type=raw,value=${{ github.sha }}
-          flavor: |
-            latest=false
 
       - uses: docker/setup-buildx-action@v3
 
@@ -30,8 +18,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          tags: |
-            local/metrics-15:${{ github.sha }}
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -39,7 +25,7 @@ jobs:
       # Save image as tar so next jobs can load the *same tested* image
       - name: Save image tar
         run: |
-          docker save -o image.tar local/metrics-15:${{ github.sha }}
+          docker save -o image.tar local/metrics-15
       - uses: actions/upload-artifact@v4
         with:
           name: built-image
