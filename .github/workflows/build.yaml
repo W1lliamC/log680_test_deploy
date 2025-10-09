@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      image_tag: ${{ steps.meta.outputs.slug }}-${{ github.sha }}   # e.g., metrics-15-<sha>
+      image_tag: ${{ steps.meta.outputs.slug }}-${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
 
