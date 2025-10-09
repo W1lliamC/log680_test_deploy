@@ -85,13 +85,11 @@ jobs:
           done
 
       - name: Start API container (image under test)
-        env:
-          TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
           docker run -d --name api --network ci-net \
             -p 8000:8000 \
             -e POSTGRES_DSN=postgresql+psycopg2://postgres:postgres@pg:5432/metrics_test \
-            -e GITHUB_TOKEN="${TOKEN}" \
+            -e GITHUB_TOKEN=${{ secrets.GIT_TOKEN }} \
             --entrypoint "" \
             local/metrics-15:${{ github.sha }} \
             uvicorn src.app:app --host 0.0.0.0 --port 8000
