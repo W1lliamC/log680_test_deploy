@@ -27,7 +27,7 @@ def _test_env() -> None:
     """Set basic test environment defaults."""
     os.environ.setdefault("TESTING", "1")
     # Safe default to avoid accidental real calls; override in env if needed.
-    os.environ.setdefault("GITHUB_TOKEN", "unit-test-token")
+    os.environ.setdefault("TOKEN_GITHUB", "unit-test-token")
 
 
 # ---------------------------------------------------------------------------
