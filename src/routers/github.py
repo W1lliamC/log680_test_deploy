@@ -17,16 +17,16 @@ router = APIRouter(tags=["github"])
 
 @router.post(
     "/refresh",
-    summary="Refresh Issues and PRs (no Project Status sync)",
+    summary="Rafraîchir les Issues et PRs (sans synchronisation du statut du projet)",
     response_model=None,
 )
 def refresh_ingest() -> None:
-    """Fetch latest GitHub Issues and PRs and persist them.
+    """Récupère les dernières Issues et Pull Requests GitHub et les enregistre.
 
     Notes
     -----
-    - This does *not* sync Project (v2) Status → `Task.column_name`.
-    - Use `/snapshot` if you also want to sync columns and record a Snapshot.
+    - Cette opération *ne* synchronise *pas* le statut du Project (v2) → `Task.column_name`.
+    - Utilisez `/snapshot` si vous souhaitez aussi synchroniser les colonnes et enregistrer un Snapshot.
     """
     db: Session = SessionLocal()
     try:
@@ -39,34 +39,34 @@ def refresh_ingest() -> None:
 @router.post(
     "/snapshot",
     summary=(
-        "Refresh Issues/PRs, sync Project Status → Task.column_name, "
-        "count by column, and insert a Snapshot"
+        "Rafraîchir Issues/PRs, synchroniser le statut Project → Task.column_name, "
+        "compter par colonne et insérer un Snapshot"
     ),
 )
 def snapshot_projects_v2(
     number: int = Query(
         ...,
-        description="Project number as shown in the URL (Projects v2).",
+        description="Numéro du projet affiché dans l'URL (Projects v2).",
         examples=[1, 2, 42],
     ),
 ) -> dict:
-    """Create a Kanban snapshot from a GitHub Projects v2 board.
+    """Créer un snapshot Kanban à partir d'un board GitHub Projects v2.
 
-    Steps
-    -----
-    1. Refresh Issues and Pull Requests (ingest from GitHub).
-    2. Pull Project v2 items, read each item Status, update `Task.column_name`.
-    3. Count tasks per column and persist a `Snapshot`.
+    Étapes
+    ------
+    1. Rafraîchir les Issues et Pull Requests (ingester depuis GitHub).
+    2. Récupérer les items du Project v2, lire le statut de chaque item, mettre à jour `Task.column_name`.
+    3. Compter les tâches par colonne et persister un `Snapshot`.
 
-    Parameters
+    Paramètres
     ----------
     number:
-        The Project number (user-scoped project at `settings.github_owner`).
+        Le numéro du projet (projet user-scoped à `settings.github_owner`).
 
-    Returns
-    -------
+    Retourne
+    --------
     dict
-        A payload like `{"updated": <int>, "counts": {"À faire": 2, "En cours": 3, ...}}`.
+        Un payload du type `{"updated": <int>, "counts": {"À faire": 2, "En cours": 3, ...}}`.
     """
     db: Session = SessionLocal()
     try:
