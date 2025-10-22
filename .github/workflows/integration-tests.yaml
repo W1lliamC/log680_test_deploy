@@ -1,14 +1,16 @@
 name: integration-tests
 on:
-  push:
+  workflow_run:
+    workflows: ["build"]
+    types: [completed]
     branches: [ '*' ]  # Runs on all branches
-  pull_request:
-    branches: [ '*' ]  # Also runs on PRs
   workflow_dispatch:
 
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    # Only run if the build workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     env:
       BASE_URL: http://127.0.0.1:8000
     steps:
@@ -17,7 +19,7 @@ jobs:
       - name: Download built image
         uses: actions/download-artifact@v4
         with:
-          name: built-image-${{ github.sha }}
+          name: built-image-${{ github.event.workflow_run.head_sha }}
           path: .
 
       - name: Load image
@@ -52,7 +54,7 @@ jobs:
             -e OWNER_GITHUB="${{ secrets.OWNER_GITHUB  }}" \
             -e REPO_GITHUB="${{ secrets.REPO_GITHUB  }}"-eq15 \
             --entrypoint "" \
-            local/metrics-15:${{ github.sha }} \
+            local/metrics-15:${{ github.event.workflow_run.head_sha }} \
             uvicorn src.app:app --host 0.0.0.0 --port 8000
 
           for i in {1..30}; do
