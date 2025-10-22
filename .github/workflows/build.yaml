@@ -79,7 +79,7 @@ jobs:
             -e POSTGRES_DSN=postgresql+psycopg2://postgres:postgres@pg:5432/metrics_test \
             -e TOKEN_GITHUB="${{ secrets.TOKEN_GITHUB  }}" \
             -e OWNER_GITHUB="${{ secrets.OWNER_GITHUB  }}" \
-            -e REPO_GITHUB="${{ secrets.REPO_GITHUB  }}"-eq15 \
+            -e REPO_GITHUB="${{ secrets.REPO_GITHUB  }}" \
             --entrypoint "" \
             local/metrics-15:${{ github.sha }} \
             uvicorn src.app:app --host 0.0.0.0 --port 8000
