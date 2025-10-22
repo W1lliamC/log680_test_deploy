@@ -1,0 +1,42 @@
+name: push-to-registry
+on:
+  push:
+    branches: [ main ]  # Only runs on main branch
+  workflow_dispatch:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download tested image
+        uses: actions/download-artifact@v4
+        with:
+          name: built-image-${{ github.sha }}
+          path: .
+
+      - name: Load image
+        run: docker load -i image.tar
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Compute public tags (latest on main and a build number)
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: w1lliamC/metrics-15
+          flavor: |
+            latest=true
+          tags: |
+            type=raw,value=build-${{ github.run_number }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}

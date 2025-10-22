@@ -1,0 +1,88 @@
+name: integration-tests
+on:
+  push:
+    branches: [ '*' ]  # Runs on all branches
+  pull_request:
+    branches: [ '*' ]  # Also runs on PRs
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download built image
+        uses: actions/download-artifact@v4
+        with:
+          name: built-image-${{ github.sha }}
+          path: .
+
+      - name: Load image
+        run: |
+          docker load -i image.tar
+          docker image ls | grep metrics-15 || true
+
+      - name: Create test network
+        run: docker network create ci-net
+
+      - name: Start Postgres (ephemeral test DB)
+        run: |
+          docker run -d --name pg --network ci-net \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=metrics_test \
+            -p 5432:5432 \
+            postgres:16
+          for i in {1..30}; do
+            if docker exec pg pg_isready -U postgres -d metrics_test >/dev/null 2>&1; then
+              echo "Postgres is ready"; break
+            fi
+            echo "Waiting for Postgres..."; sleep 2
+          done
+
+      - name: Start API container (image under test)
+        run: |
+          docker run -d --name api --network ci-net \
+            -p 8000:8000 \
+            -e POSTGRES_DSN=postgresql+psycopg2://postgres:postgres@pg:5432/metrics_test \
+            -e TOKEN_GITHUB="${{ secrets.TOKEN_GITHUB  }}" \
+            -e OWNER_GITHUB="${{ secrets.OWNER_GITHUB  }}" \
+            -e REPO_GITHUB="${{ secrets.REPO_GITHUB  }}"-eq15 \
+            --entrypoint "" \
+            local/metrics-15:${{ github.sha }} \
+            uvicorn src.app:app --host 0.0.0.0 --port 8000
+
+          for i in {1..30}; do
+            if curl -fsS ${BASE_URL}/health >/dev/null; then
+              echo "API is up"; break
+            fi
+            echo "Waiting for API..."
+            sleep 2
+            docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            docker logs --tail=50 api || true
+          done
+
+          curl -fsS ${BASE_URL}/health
+
+      - name: Set up Python for pytest
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test deps
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run integration tests
+        run: pytest tests/integration/ --cov=src --cov-report=term-missing --base-url=${BASE_URL} -v
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker logs api || true
+          docker logs pg || true
+          docker rm -f api pg || true
+          docker network rm ci-net || true
