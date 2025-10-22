@@ -19,8 +19,10 @@ jobs:
       - name: Download built image
         uses: actions/download-artifact@v4
         with:
-          name: built-image-${{ github.event.workflow_run.head_sha }}
+          name: built-image
           path: .
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Load image
         run: |
